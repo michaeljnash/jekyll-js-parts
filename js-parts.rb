@@ -85,6 +85,19 @@ module ConcatJS
       end
     end
 
+    def self.add_page_scripts(page_scripts)
+      page_scripts.each_key do |page_path|
+        page_script_path = File.join(ConcatJS.page_scripts_dir, ConcatJS::Util.to_js_ext(page_path))
+        page_data = File.read(page_path)
+        page_data.gsub!(/<script(?=[^>]*\bclass=['"]\b#{ConcatJS.plugin_name}\b['"])(?=[^>]*\btype=['"](.*?\bmodule\b.*?)['"]).*?>.*?<\/script>\s*/im, '')
+        page_script_tag = "\n<script type=\"module\" class=\"#{ConcatJS.plugin_name}\" src=\"#{page_script_path}\"></script>\n"
+        page_data_new = page_data.include?("<body>") ?
+          page_data.sub(/(<body>)/, "\\1#{page_script_tag}") :
+          page_data.sub(/(.*?---.*?---)/m, "\\1#{page_script_tag}")
+        File.write(page_path, page_data_new)
+      end
+    end
+
     def self.to_js_ext(path)
       path.sub(/\.[^.]+\z/, '.js')
     end
@@ -105,17 +118,7 @@ end
 Jekyll::Hooks.register :site, :post_render do
   ConcatJS::Util.write_output(ConcatJS.modules, ConcatJS.modules_dir)
   ConcatJS::Util.write_output(ConcatJS.page_scripts, ConcatJS.page_scripts_dir)
-
-  ConcatJS.page_scripts.each_key do |page_path|
-    page_script_path = File.join(ConcatJS.page_scripts_dir, ConcatJS::Util.to_js_ext(page_path))
-    page_data = File.read(page_path)
-    page_data.gsub!(/<script(?=[^>]*\bclass=['"]\b#{ConcatJS.plugin_name}\b['"])(?=[^>]*\btype=['"](.*?\bmodule\b.*?)['"]).*?>.*?<\/script>\s*/im, '')
-    page_script_tag = "\n<script type=\"module\" class=\"#{ConcatJS.plugin_name}\" src=\"#{page_script_path}\"></script>\n"
-    page_data_new = page_data.include?("<body>") ?
-      page_data.sub(/(<body>)/, "\\1#{page_script_tag}") :
-      page_data.sub(/(.*?---.*?---)/m, "\\1#{page_script_tag}")
-    File.write(page_path, page_data_new)
-  end
+  ConcatJS::Util.add_page_scripts(ConcatJS.page_scripts)
 end
 
 Jekyll::Hooks.register :site, :post_write do
