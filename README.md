@@ -5,7 +5,7 @@ The idea is that you can include js partials within the html of your _includes (
 
 Good for highly coupled javascript to some html that would make sense / be easier to be beside your html for more maintainable code.
 
-The script tag structure is:
+The liquid tag structure is:
 ```{% js_part output_module_file.js/part_id %}```
 
 Example:
