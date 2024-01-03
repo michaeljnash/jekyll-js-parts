@@ -9,7 +9,7 @@ module JSParts
   self.page_scripts_dir = "assets/scripts/#{plugin_name}/page_scripts"
   self.modules_dir = "assets/scripts/#{plugin_name}/modules"
 
-  class Block < Liquid::Block
+  class PartBlock < Liquid::Block
 
     def initialize(tag_name, input, tokens)
       @module_file, @part_id = input.split('/').map(&:strip)
@@ -106,7 +106,7 @@ module JSParts
 
 end
 
-Liquid::Template.register_tag(JSParts.plugin_name.gsub(/([a-z]+)s\b/, '\1'), JSParts::Block)
+Liquid::Template.register_tag(JSParts.plugin_name.gsub(/([a-z]+)s\b/, '\1'), JSParts::PartBlock)
 
 Jekyll::Hooks.register :site, :after_reset do
   FileUtils.mkdir_p(JSParts.page_scripts_dir) unless File.directory?(JSParts.page_scripts_dir)
