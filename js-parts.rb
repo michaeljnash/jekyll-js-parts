@@ -9,7 +9,7 @@ module JSParts
   self.page_scripts_dir = "assets/scripts/#{plugin_name}/page_scripts"
   self.modules_dir = "assets/scripts/#{plugin_name}/modules"
 
-  class PartBlock < Liquid::Block
+  class Block < Liquid::Block
 
     def initialize(tag_name, input, tokens)
       @module_file, @part_id = input.split('/').map(&:strip)
@@ -89,12 +89,14 @@ module JSParts
       page_scripts.each_key do |page_path|
         page_script_path = File.join(JSParts.page_scripts_dir, JSParts::Util.to_js_ext(page_path))
         page_data = File.read(page_path)
-        page_data.gsub!(/<script(?=[^>]*\bclass=['"]\b#{JSParts.plugin_name}\b['"])(?=[^>]*\btype=['"](.*?\bmodule\b.*?)['"]).*?>.*?<\/script>\s*/im, '')
         page_script_tag = "\n<script type=\"module\" class=\"#{JSParts.plugin_name}\" src=\"#{page_script_path}\"></script>\n"
-        page_data_new = page_data.include?("<body>") ?
-          page_data.sub(/(<body>)/, "\\1#{page_script_tag}") :
-          page_data.sub(/(.*?---.*?---)/m, "\\1#{page_script_tag}")
-        File.write(page_path, page_data_new)
+        unless page_data.include?(page_script_tag)
+          page_data.gsub!(/<script(?=[^>]*\bclass=['"]\b#{JSParts.plugin_name}\b['"])(?=[^>]*\btype=['"](.*?\bmodule\b.*?)['"]).*?>.*?<\/script>\s*/im, '')
+          page_data_new = page_data.include?("<body>") ?
+            page_data.sub(/(<body>)/, "\\1#{page_script_tag}") :
+            page_data.sub(/(.*?---.*?---)/m, "\\1#{page_script_tag}")
+          File.write(page_path, page_data_new)
+        end
       end
     end
 
@@ -106,7 +108,7 @@ module JSParts
 
 end
 
-Liquid::Template.register_tag(JSParts.plugin_name.gsub(/([a-z]+)s\b/, '\1'), JSParts::PartBlock)
+Liquid::Template.register_tag(JSParts.plugin_name.gsub(/([a-z]+)s\b/, '\1'), JSParts::Block)
 
 Jekyll::Hooks.register :site, :after_reset do
   FileUtils.mkdir_p(JSParts.page_scripts_dir) unless File.directory?(JSParts.page_scripts_dir)
