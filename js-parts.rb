@@ -12,7 +12,7 @@ module JSParts
   class Block < Liquid::Block
 
     def initialize(tag_name, input, tokens)
-      @module_file, @part_id = input.split('/').map(&:strip)
+      @module_file, @part_id = input.split('|').map(&:strip)
       validate_module_name(@module_file)
       validate_part_id(@part_id)
       super
