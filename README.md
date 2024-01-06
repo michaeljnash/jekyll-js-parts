@@ -6,11 +6,11 @@ The idea is that you can include js partials within the html of your _includes (
 Good for highly coupled javascript to some html that would make sense / be easier to be beside your html for more maintainable code.
 
 The liquid tag structure is:
-```{% js_part output_module_file.js/part_id %}```
+```{% js_part output_module_file.js|part_id %}```
 
 Example:
 ```
-{% js_part header.js/log_helloworld %}
+{% js_part header.js|log_helloworld %}
   <script>
     console.log("hello world!");
   </script>
